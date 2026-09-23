@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Misí / Store | Second-hand, carefully chosen",
+  title: "Misi Store | Second-hand, carefully chosen",
   description: "A considered collection of second-hand clothing, objects, and everyday treasures.",
 };
 
@@ -23,7 +23,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <div className="announcement">Карго низ цела Македонија 180ден.</div>
+        {children}
+      </body>
     </html>
   );
 }

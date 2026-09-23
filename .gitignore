@@ -20,18 +20,31 @@
 # production
 /build
 
+# local environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.crt
+*.p12
+
+# local services and uploaded files
+.supabase/
+/public/uploads/
+
 # misc
 .DS_Store
-*.pem
+Thumbs.db
+.idea/
+.vscode/
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
 
 # vercel
 .vercel
