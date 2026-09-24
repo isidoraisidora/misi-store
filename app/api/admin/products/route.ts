@@ -18,7 +18,8 @@ export async function GET() {
     return NextResponse.json({ products: data ?? [] });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") return unauthorized();
-    return NextResponse.json({ error: "Could not load products" }, { status: 500 });
+    console.error("Admin product list failed:", error);
+    return NextResponse.json({ error: process.env.NODE_ENV === "development" && error instanceof Error ? error.message : "Could not load products" }, { status: 500 });
   }
 }
 
@@ -46,19 +47,18 @@ export async function POST(request: Request) {
     for (const image of images) {
       const extension = image.name.split(".").pop()?.toLowerCase() || "jpg";
       const imagePath = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
-      const { error: uploadError } = await supabase.storage.from("product-images").upload(imagePath, image, { contentType: image.type, upsert: false });
+      const { error: uploadError } = await supabase.storage.from("misi-store-images").upload(imagePath, image, { contentType: image.type, upsert: false });
       if (uploadError) throw uploadError;
-      const { data: imageData } = supabase.storage.from("product-images").getPublicUrl(imagePath);
+      const { data: imageData } = supabase.storage.from("misi-store-images").getPublicUrl(imagePath);
       imageUrls.push(imageData.publicUrl);
     }
 
     const { data, error } = await supabase.from("products").insert({
-      name,
+      title: name,
       slug: `${slugify(name)}-${Date.now()}`,
       price_cents: priceCents,
-      category,
+      category_id: category,
       size: typeof formData.get("size") === "string" ? String(formData.get("size")).trim() : null,
-      image_url: imageUrls[0],
       image_urls: imageUrls,
       is_available: true,
     }).select().single();
@@ -67,6 +67,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ product: data }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") return unauthorized();
-    return NextResponse.json({ error: "Could not add product" }, { status: 500 });
+    console.error("Admin product creation failed:", error);
+    return NextResponse.json({ error: process.env.NODE_ENV === "development" && error instanceof Error ? error.message : "Could not add product" }, { status: 500 });
   }
 }

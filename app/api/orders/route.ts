@@ -1,18 +1,20 @@
+import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
+import { sendOrderConfirmationEmail } from "@/lib/order-email";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
 type OrderRequest = {
   customer?: {
-    name?: unknown;
+    firstName?: unknown;
+    lastName?: unknown;
     email?: unknown;
     phone?: unknown;
     addressLine?: unknown;
     city?: unknown;
     postalCode?: unknown;
     country?: unknown;
-    notes?: unknown;
   };
   items?: unknown;
 };
@@ -30,9 +32,8 @@ function requiredText(value: unknown, field: string, maxLength = 200) {
   return text;
 }
 
-function optionalText(value: unknown, field: string, maxLength = 1000) {
-  if (value === undefined || value === null || value === "") return null;
-  return requiredText(value, field, maxLength);
+function isEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 export async function POST(request: Request) {
@@ -74,18 +75,30 @@ export async function POST(request: Request) {
       return { productId, quantity };
     });
 
+    const firstName = requiredText(customer.firstName, "firstName");
+    const lastName = requiredText(customer.lastName, "lastName");
+    const email = requiredText(customer.email, "email", 320);
+    if (!isEmail(email)) throw new Error("email is invalid");
+    const confirmationToken = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(confirmationToken).digest("hex");
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    const appUrl = process.env.APP_URL;
+    if (!appUrl) throw new Error("Missing APP_URL");
+
     const { data, error } = await getSupabaseAdmin().rpc("create_order", {
       order_customer: {
-        name: requiredText(customer.name, "name"),
-        email: requiredText(customer.email, "email", 320),
+        firstName,
+        lastName,
+        email,
         phone: requiredText(customer.phone, "phone", 40),
         addressLine: requiredText(customer.addressLine, "addressLine"),
         city: requiredText(customer.city, "city"),
         postalCode: requiredText(customer.postalCode, "postalCode", 20),
-        country: optionalText(customer.country, "country", 100) ?? "North Macedonia",
-        notes: optionalText(customer.notes, "notes"),
+        country: typeof customer.country === "string" && customer.country.trim() ? customer.country.trim() : "North Macedonia",
       },
       requested_items: normalizedItems,
+      token_hash: tokenHash,
+      token_expires_at: expiresAt,
     });
 
     if (error) {
@@ -97,7 +110,8 @@ export async function POST(request: Request) {
     }
 
     const order = Array.isArray(data) ? data[0] : data;
-    return NextResponse.json({ order }, { status: 201 });
+    await sendOrderConfirmationEmail({ email, firstName, orderNumber: order.order_number, confirmationUrl: `${appUrl}/api/orders/confirm?token=${confirmationToken}` });
+    return NextResponse.json({ order: { orderNumber: order.order_number, status: "in_progress" } }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid order";
     return NextResponse.json({ error: message }, { status: 400 });

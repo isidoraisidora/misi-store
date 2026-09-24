@@ -62,6 +62,12 @@ h2 { font-size: clamp(40px, 5vw, 64px); line-height: .9; margin: 0; }
 .text-link { border-bottom: 1px solid var(--ink); font-size: 11px; letter-spacing: .1em; padding-bottom: 7px; text-transform: uppercase; }
 .text-link span { color: var(--pink); font-size: 17px; margin-left: 8px; }
 .product-grid { display: grid; gap: 22px; grid-template-columns: repeat(4, 1fr); }
+.product-carousel { overflow: hidden; }
+.product-carousel-track { animation: product-carousel-scroll 450s linear infinite; display: flex; gap: 22px; width: max-content; }
+.product-carousel-track:hover { animation-play-state: paused; }
+.product-carousel .product-card, .product-carousel-copy { flex: 0 0 calc((min(90vw, 1260px) - 66px) / 4); }
+.product-carousel-copy { display: flex; gap: 22px; }
+@keyframes product-carousel-scroll { from { transform: translateX(0); } to { transform: translateX(calc(-50% + 11px)); } }
 .product-image { aspect-ratio: .82; background-position: center; background-size: cover; position: relative; }
 .product-image > span { background: var(--cream); font-size: 9px; left: 12px; letter-spacing: .1em; padding: 7px 9px; position: absolute; text-transform: uppercase; top: 12px; }
 .save-button { background: transparent; border: 0; color: var(--ink); cursor: pointer; font-size: 22px; position: absolute; right: 12px; top: 8px; }
@@ -110,6 +116,15 @@ footer { align-items: start; display: flex; justify-content: space-between; padd
 .story-note .eyebrow { margin-bottom: 24px; }
 .story-note blockquote { font-family: Georgia, serif; font-size: clamp(30px, 4vw, 56px); font-style: italic; letter-spacing: -.04em; line-height: 1.05; margin: 0 auto; max-width: 790px; }
 .story-note .button { margin-top: 38px; text-align: left; }
+.faq-section { margin: auto; max-width: 1400px; padding: 105px 10vw 115px; }
+.faq-intro { color: #667067; font-size: 14px; line-height: 1.7; margin: 0 0 5px; max-width: 245px; }
+.faq-list { border-top: 1px solid #d4d7ce; }
+.faq-list details { border-bottom: 1px solid #d4d7ce; padding: 22px 0; }
+.faq-list summary { cursor: pointer; font-size: 16px; list-style: none; padding-right: 30px; position: relative; }
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary::after { color: var(--pink); content: "+"; font-size: 20px; position: absolute; right: 0; top: -4px; }
+.faq-list details[open] summary::after { content: "−"; }
+.faq-list details p { color: #667067; font-size: 13px; line-height: 1.7; margin: 15px 0 2px; max-width: 560px; }
 .catalogue-page { min-height: 100vh; }
 .catalogue-header { align-items: end; display: flex; justify-content: space-between; margin: auto; max-width: 1400px; padding: 88px 10vw 82px; }
 .catalogue-header h1 { font-size: clamp(52px, 7vw, 94px); margin: 0; }
@@ -134,6 +149,7 @@ footer { align-items: start; display: flex; justify-content: space-between; padd
 .results-heading { align-items: center; display: flex; justify-content: space-between; margin-bottom: 25px; }
 .results-heading p { color: #879087; font-size: 11px; margin: 0; }
 .results-heading strong { color: var(--ink); font-weight: 600; }
+.results-heading > span { color: #879087; font-size: 11px; }
 .clear-button { border-bottom: 1px solid var(--ink); color: var(--ink); }
 .catalogue-grid { display: grid; gap: 34px 22px; grid-template-columns: repeat(4, 1fr); }
 .catalogue-card .product-image { aspect-ratio: .82; }
@@ -148,6 +164,49 @@ footer { align-items: start; display: flex; justify-content: space-between; padd
 .empty-catalogue { padding: 90px 0 110px; text-align: center; }
 .empty-catalogue h2 { font-size: clamp(40px, 5vw, 64px); }
 .empty-catalogue .button { margin-top: 15px; text-align: left; }
+.pagination { align-items: center; display: flex; gap: 22px; justify-content: center; margin-top: 62px; }
+.pagination button { background: transparent; border: 1px solid #cbd0c7; color: var(--ink); cursor: pointer; font-size: 18px; height: 38px; width: 42px; }
+.pagination button:disabled { color: #bfc5ba; cursor: default; }
+.pagination span { font-size: 11px; letter-spacing: .08em; }
+.catalogue-preview { border-bottom: 1px solid var(--ink); display: inline-flex; font-size: 12px; letter-spacing: .08em; padding-bottom: 10px; text-transform: uppercase; }
+.catalogue-preview span { color: var(--pink); font-size: 18px; margin-left: 10px; }
+.home-empty-products { color: #667067; font-size: 14px; padding: 30px 0 42px; }
+.checkout-page { min-height: 100vh; }
+.checkout-layout { display: grid; gap: 12%; grid-template-columns: 1fr 360px; margin: auto; max-width: 1200px; padding: 90px 8vw 120px; }
+.cart-layout, .checkout-form-page { display: grid; gap: 12%; grid-template-columns: 1fr 360px; margin: auto; max-width: 1200px; padding: 90px 8vw 120px; }
+.cart-layout h1, .checkout-form-page h1 { font-size: clamp(50px, 7vw, 88px); }
+.cart-page, .checkout-page { min-height: 100vh; }
+.cart-items { margin-top: 55px; max-width: 700px; }
+.cart-items article { align-items: center; border-top: 1px solid #d4d7ce; display: grid; gap: 18px; grid-template-columns: 72px 1fr auto; padding: 15px 0; }
+.cart-items article:last-child { border-bottom: 1px solid #d4d7ce; }
+.cart-items h2 { font-size: 15px; letter-spacing: 0; margin: 0 0 6px; }
+.cart-items p { color: #879087; font-size: 11px; margin: 0; }
+.cart-items strong { font-size: 13px; font-weight: 500; }
+.remove-cart-button { background: transparent; border: 0; border-bottom: 1px solid #bfc5ba; color: #667067; cursor: pointer; font-size: 10px; padding: 4px 0; }
+.cart-summary { border-top: 1px solid var(--ink); padding-top: 24px; }
+.cart-summary .button { margin-top: 28px; width: 100%; }
+.cart-summary .checkout-muted { margin-top: 20px; }
+.cart-empty { margin-top: 55px; }
+.checkout-form-page .checkout-form { margin-top: 0; }
+.checkout-layout h1, .checkout-success h1 { font-size: clamp(50px, 7vw, 88px); }
+.checkout-items { margin-top: 55px; max-width: 620px; }
+.checkout-items article { align-items: center; border-top: 1px solid #d4d7ce; display: grid; gap: 18px; grid-template-columns: 72px 1fr auto; padding: 15px 0; }
+.checkout-image { aspect-ratio: 1; background-position: center; background-size: cover; }
+.checkout-items h2 { font-size: 15px; letter-spacing: 0; margin: 0 0 6px; }
+.checkout-items p { color: #879087; font-size: 11px; margin: 0; }
+.checkout-items strong { font-size: 13px; font-weight: 500; }
+.checkout-total { border-top: 1px solid var(--ink); display: flex; justify-content: space-between; margin-top: 15px; padding-top: 16px; }
+.checkout-form { border-top: 1px solid var(--ink); display: flex; flex-direction: column; gap: 18px; padding-top: 24px; }
+.checkout-form label { display: flex; flex-direction: column; font-size: 10px; gap: 7px; letter-spacing: .08em; text-transform: uppercase; }
+.checkout-form input { background: transparent; border: 0; border-bottom: 1px solid #bfc5ba; color: var(--ink); outline: 0; padding: 10px 0; }
+.checkout-form input:focus { border-color: var(--pink); }
+.checkout-form .button { border: 0; cursor: pointer; margin-top: 10px; }
+.checkout-muted { color: #667067; font-size: 14px; line-height: 1.7; }
+.checkout-muted a { border-bottom: 1px solid var(--ink); }
+.checkout-success { margin: auto; max-width: 700px; padding: 12vh 8vw 18vh; }
+.checkout-success > p:not(.eyebrow) { color: #667067; font-size: 15px; line-height: 1.7; max-width: 450px; }
+.checkout-success .button { margin-top: 22px; }
+@media (max-width: 700px) { .checkout-layout { display: block; padding: 60px 8vw 80px; } .checkout-form { margin-top: 70px; } .checkout-items { margin-top: 35px; } }
 .admin-page { min-height: 100vh; }
 .admin-login { margin: auto; max-width: 430px; padding: 12vh 8vw 15vh; }
 .admin-login .wordmark { display: inline-block; margin-bottom: 100px; }
@@ -184,3 +243,4 @@ footer { align-items: start; display: flex; justify-content: space-between; padd
 @media (max-width: 700px) { .story-hero { display: block; min-height: 0; padding: 65px 8vw 80px; } .story-hero-copy h1 { font-size: clamp(47px, 14vw, 68px); } .story-mark { height: 145px; margin: 55px 10px 0 auto; width: 145px; } .story-mark strong { font-size: 64px; } .story-intro { display: block; padding: 65px 8vw 70px; } .story-intro h2 { font-size: 48px; } .story-timeline { padding: 75px 8vw; } .timeline-item { gap: 18px; grid-template-columns: 35px 1fr; } .timeline-item h3 { font-size: 17px; } .story-note { padding: 75px 8vw 85px; } }
 @media (max-width: 700px) { .catalogue-header { align-items: start; display: block; padding: 62px 8vw 55px; } .catalogue-header h1 { font-size: clamp(48px, 13vw, 68px); } .catalogue-intro { margin-top: 30px; } .catalogue-tools { align-items: stretch; flex-direction: column; gap: 18px; margin: 0 8vw; padding: 20px 0; } .category-select { justify-content: space-between; } .category-select select { flex: 1; max-width: 190px; } .catalogue-controls { align-items: stretch; flex-wrap: wrap; gap: 18px; justify-content: space-between; } .search-field { flex: 1 1 100%; } .catalogue-results { padding: 28px 8vw 75px; } .catalogue-grid { gap: 28px 12px; grid-template-columns: repeat(2, 1fr); } .catalogue-card .product-info { display: block; min-height: 102px; } .catalogue-card .product-info strong { display: block; margin-top: 8px; } .catalogue-card .product-info h2 { font-size: 13px; } .add-button { font-size: 9px; padding: 10px 5px; } }
 @media (max-width: 700px) { .admin-login { padding: 9vh 8vw 12vh; } .admin-login .wordmark { margin-bottom: 80px; } .admin-header { padding: 22px 6vw; } .admin-header span { display: none; } .admin-content { padding: 60px 8vw 80px; } .admin-title { align-items: start; display: block; margin-bottom: 45px; } .admin-title > p { margin-top: 20px; } .admin-layout { display: block; } .admin-products { margin-top: 70px; } }
+@media (max-width: 700px) { .product-carousel-track { animation-duration: 120s; gap: 12px; } .product-carousel .product-card, .product-carousel-copy { flex-basis: calc((92vw - 12px) / 2); } .product-carousel-copy { gap: 12px; } .faq-section { padding: 75px 8vw 85px; } .faq-intro { margin-top: 28px; } .cart-layout, .checkout-form-page { display: block; padding: 60px 8vw 80px; } .cart-items { margin-top: 35px; } .cart-summary { margin-top: 70px; } .cart-items article { grid-template-columns: 58px 1fr auto; gap: 12px; } .cart-items article .remove-cart-button { grid-column: 2 / -1; justify-self: start; } }

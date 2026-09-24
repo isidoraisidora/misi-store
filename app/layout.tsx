@@ -24,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <div className="announcement">Карго низ цела Македонија 180ден.</div>
+        <div className="announcement">Карго низ цела Македонија 180ден. | Минимална цена за нарачка 200ден.</div>
         {children}
       </body>
     </html>
