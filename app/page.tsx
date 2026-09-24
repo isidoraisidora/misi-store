@@ -22,7 +22,7 @@ export default async function Home() {
           <p className="eyebrow">Good things, twice loved</p>
           <h1>Пронајди го парчето<br /><em>за тебе.</em></h1>
           <p className="hero-text">Second hand облека, аксесоари и многу други работи, специјално одберени.</p>
-          <Link className="button button-dark" href="/catalogue">Разгледај парчиња</Link>
+          <Link className="button button-dark" href="#shop">Разгледај парчиња</Link>
         </div>
         <div className="hero-image" role="img" aria-label="A curated rack of vintage clothing" />
         <div className="hero-note"><br /><strong>Small things,<br />well found.</strong></div>
