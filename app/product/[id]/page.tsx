@@ -3,8 +3,6 @@ import { notFound } from "next/navigation";
 import { getAvailableProducts } from "@/lib/products-server";
 import ProductActions from "./product-actions";
 
-const price = (cents: number) => `${(cents / 100).toFixed(0)} ден.`;
-
 export const dynamic = "force-dynamic";
 
 type ProductPageProps = {
@@ -25,11 +23,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
       <section className="product-detail-info">
         <Link className="product-back-link" href="/catalogue">← Назад кон каталогот</Link>
-        <p className="eyebrow">{product.category_id}</p>
         <h1>{product.title}</h1>
-        <div className="product-detail-price">{price(product.price_cents)}</div>
         <dl className="product-facts"><div><dt>Големина</dt><dd>{product.size ?? "OS"}</dd></div><div><dt>Категорија</dt><dd>{product.category_id}</dd></div></dl>
-        {product.description && <p className="product-description">{product.description}</p>}
         <ProductActions product={product} />
       </section>
     </div>

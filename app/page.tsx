@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getAvailableProducts } from "@/lib/products-server";
 
-const price = (cents: number) => `${(cents / 100).toFixed(0)} ден.`;
+const price = (denars: number | null | undefined) => denars == null ? "Цена недостапна" : `${denars.toFixed(0)} ден.`;
 
 export const dynamic = "force-dynamic";
 

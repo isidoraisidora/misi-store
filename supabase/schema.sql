@@ -9,7 +9,7 @@ create table if not exists public.categories (
 insert into public.categories (slug, name) values
   ('маица', 'маица'), ('кошула', 'кошула'), ('блуза', 'блуза'),
   ('фармерки', 'фармерки'), ('пантолони', 'пантолони'), ('сукња', 'сукња'),
-  ('фустан', 'фустан'), ('додатоци', 'додатоци'), ('чевли', 'чевли')
+  ('фустан', 'фустан'), ('јакна', 'јакна'), ('додатоци', 'додатоци'), ('чевли', 'чевли')
 on conflict (slug) do update set name = excluded.name;
 
 create table if not exists public.products (
@@ -39,7 +39,7 @@ do $$ begin
     execute 'update public.products set title = coalesce(title, name) where title is null';
   end if;
   if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'products' and column_name = 'category') then
-    execute $sql$update public.products set category_id = case lower(coalesce(category, '')) when 'shirt' then 'кошула' when 'shoes' then 'чевли' when 'pants' then 'пантолони' when 'accessories' then 'додатоци' else coalesce(category, 'маица') end where category_id is null$sql$;
+    execute $sql$update public.products set category_id = case lower(coalesce(category, '')) when 'shirt' then 'кошула' when 'shoes' then 'чевли' when 'pants' then 'пантолони' when 'jacket' then 'јакна' when 'accessories' then 'додатоци' else coalesce(category, 'маица') end where category_id is null$sql$;
   else
     update public.products set category_id = 'маица' where category_id is null;
   end if;

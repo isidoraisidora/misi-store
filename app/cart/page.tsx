@@ -14,7 +14,7 @@ type CartItem = {
   };
 };
 
-const price = (cents: number) => `${(cents / 100).toFixed(0)} ден.`;
+const price = (denars: number | null | undefined) => denars == null ? "Цена недостапна" : `${denars.toFixed(0)} ден.`;
 
 export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([]);
