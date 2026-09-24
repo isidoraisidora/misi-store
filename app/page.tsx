@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const products = await getAvailableProducts();
-  const productCards = products.map((product) => <article className="product-card" key={product.id}><div className="product-image" style={{ backgroundImage: `url(${product.image_urls[0]})` }} /><div className="product-info"><h3>{product.title}</h3><p>{product.size ?? "OS"} <span>·</span> {product.category_id}</p><strong>{price(product.price_cents)}</strong></div></article>);
+  const productCards = products.map((product) => <article className="product-card" key={product.id}><Link aria-label={`Погледни детали за ${product.title}`} className="product-image-link" href={`/product/${product.id}`}><div className="product-image" style={{ backgroundImage: `url(${product.image_urls[0]})` }} /></Link><div className="product-info"><h3>{product.title}</h3><p>{product.size ?? "OS"} <span>·</span> {product.category_id}</p><strong>{price(product.price_cents)}</strong></div></article>);
 
   return (
     <main>
