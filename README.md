@@ -47,6 +47,7 @@ The complete list is available in `.env.example`.
 | `APP_URL` | Public app URL used when building order confirmation links. |
 | `RESEND_API_KEY` | Resend API key used to send order emails. |
 | `ORDER_FROM_EMAIL` | Sender address for order confirmation emails. |
+| `ORDER_NOTIFICATION_EMAIL` | Recipient for new-order notifications. Falls back to `ADMIN_EMAIL` when omitted. |
 | `ADMIN_EMAIL` | Admin login email. |
 | `ADMIN_PASSWORD` | Admin login password. Use a strong password in production. |
 | `ADMIN_SESSION_SECRET` | Long random secret used to sign the admin session cookie. |

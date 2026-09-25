@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
-import { sendOrderConfirmationEmail } from "@/lib/order-email";
+import { sendNewOrderNotificationEmail, sendOrderConfirmationEmail } from "@/lib/order-email";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -111,6 +111,13 @@ export async function POST(request: Request) {
 
     const order = Array.isArray(data) ? data[0] : data;
     await sendOrderConfirmationEmail({ email, firstName, orderNumber: order.order_number, confirmationUrl: `${appUrl}/api/orders/confirm?token=${confirmationToken}` });
+    await sendNewOrderNotificationEmail({
+      orderNumber: order.order_number,
+      customerName: `${firstName} ${lastName}`,
+      customerEmail: email,
+      customerPhone: requiredText(customer.phone, "phone", 40),
+      totalCents: order.total_cents,
+    });
     return NextResponse.json({ order: { orderNumber: order.order_number, status: "in_progress" } }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid order";
