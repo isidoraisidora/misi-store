@@ -29,7 +29,7 @@ export default function StoryPage() {
     <main className="story-page">
       <nav className="nav-shell" aria-label="Main navigation">
         <Link className="wordmark" href="/">MISI STORE</Link>
-        <div className="nav-links"><Link href="/#shop">Каталог</Link><Link href="/story">Нашата приказна</Link></div>
+        <div className="nav-links"><Link href="/catalogue">Каталог</Link><Link href="/story">Нашата приказна</Link></div>
         <Link className="bag-link" href="/cart">Кошничка <span className="bag-count">0</span></Link>
       </nav>
 
