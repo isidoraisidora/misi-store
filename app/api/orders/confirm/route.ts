@@ -45,9 +45,31 @@ export async function POST(request: Request) {
 
   if (resultStatus === "confirmed") {
     try {
+      const { data: order, error: orderError } = await supabaseAdmin
+        .from("orders")
+        .select("order_number, customer_first_name, customer_last_name, email, phone, address_line, city, postal_code, country, total_cents")
+        .eq("id", result.order_id)
+        .single();
+      if (orderError) throw orderError;
+
+      const { data: items, error: itemsError } = await supabaseAdmin
+        .from("order_items")
+        .select("product_title, price_cents, quantity")
+        .eq("order_id", result.order_id);
+      if (itemsError) throw itemsError;
+
       await sendOrderConfirmedNotificationEmail({
-        orderNumber: result.order_number,
-        customerName: "",
+        orderNumber: order.order_number,
+        firstName: order.customer_first_name,
+        lastName: order.customer_last_name,
+        email: order.email,
+        phone: order.phone,
+        addressLine: order.address_line,
+        city: order.city,
+        postalCode: order.postal_code ?? "",
+        country: order.country,
+        totalCents: order.total_cents,
+        items: (items ?? []).map((item) => ({ title: item.product_title, priceCents: item.price_cents, quantity: item.quantity })),
       });
     } catch (e) {
       console.error("Confirmation email to owner failed:", e);

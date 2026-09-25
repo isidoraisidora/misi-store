@@ -30,8 +30,10 @@ function OrderConfirmContent() {
 
   useEffect(() => {
     if (!token) {
-      setErrorMsg("Линкот е невалиден.");
-      setLoading(false);
+      void Promise.resolve().then(() => {
+        setErrorMsg("Линкот е невалиден.");
+        setLoading(false);
+      });
       return;
     }
 

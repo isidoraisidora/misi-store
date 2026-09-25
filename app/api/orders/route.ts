@@ -79,6 +79,10 @@ export async function POST(request: Request) {
     const email = requiredText(customer.email, "email", 320);
     if (!isEmail(email)) throw new Error("email is invalid");
     const phone = requiredText(customer.phone, "phone", 40);
+    const addressLine = requiredText(customer.addressLine, "addressLine");
+    const city = requiredText(customer.city, "city");
+    const postalCode = requiredText(customer.postalCode, "postalCode", 20);
+    const country = typeof customer.country === "string" && customer.country.trim() ? customer.country.trim() : "North Macedonia";
 
     const confirmationToken = randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(confirmationToken).digest("hex");
@@ -92,13 +96,10 @@ export async function POST(request: Request) {
         lastName,
         email,
         phone,
-        addressLine: requiredText(customer.addressLine, "addressLine"),
-        city: requiredText(customer.city, "city"),
-        postalCode: requiredText(customer.postalCode, "postalCode", 20),
-        country:
-          typeof customer.country === "string" && customer.country.trim()
-            ? customer.country.trim()
-            : "North Macedonia",
+        addressLine,
+        city,
+        postalCode,
+        country,
       },
       requested_items: normalizedItems,
       token_hash: tokenHash,
@@ -114,26 +115,44 @@ export async function POST(request: Request) {
     }
 
     const order = Array.isArray(data) ? data[0] : data;
+    const { data: orderItems, error: orderItemsError } = await supabaseAdmin
+      .from("order_items")
+      .select("product_title, price_cents, quantity")
+      .eq("order_id", order.order_id);
+    if (orderItemsError) console.error("Order created but items could not be loaded for email:", orderItemsError);
+    const emailItems = (orderItems ?? []).map((item) => ({
+      title: item.product_title,
+      priceCents: item.price_cents,
+      quantity: item.quantity,
+    }));
 
     // Order is already created at this point - email failures should NOT
     // fail the request or the customer might retry and duplicate the order.
-    try {
-      await sendOrderConfirmationEmail({
+    const emailDetails = {
+      orderNumber: order.order_number,
+      firstName,
+      lastName,
+      email,
+      phone,
+      addressLine,
+      city,
+      postalCode,
+      country,
+      totalCents: order.total_cents,
+      items: emailItems,
+    };
+    const emailResults = await Promise.allSettled([
+      sendOrderConfirmationEmail({
         email,
         firstName,
         orderNumber: order.order_number,
         confirmationUrl: `${appUrl}/order-confirm?token=${confirmationToken}`,
-      });
-      await sendNewOrderNotificationEmail({
-        orderNumber: order.order_number,
-        customerName: `${firstName} ${lastName}`,
-        customerEmail: email,
-        customerPhone: phone,
-        totalCents: order.total_cents,
-      });
-    } catch (emailError) {
-      console.error("Order created but email failed:", emailError);
-    }
+      }),
+      sendNewOrderNotificationEmail(emailDetails),
+    ]);
+    emailResults.forEach((result) => {
+      if (result.status === "rejected") console.error("Order created but email failed:", result.reason);
+    });
 
     return NextResponse.json({ order: { orderNumber: order.order_number, status: "in_progress" } }, { status: 201 });
   } catch (error) {

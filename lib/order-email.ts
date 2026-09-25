@@ -7,17 +7,18 @@ type ConfirmationEmail = {
   confirmationUrl: string;
 };
 
-type NewOrderNotification = {
+export type OrderEmailDetails = {
   orderNumber: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  addressLine: string;
+  city: string;
+  postalCode: string;
+  country: string;
   totalCents: number;
-};
-
-type ConfirmedOrderNotification = {
-  orderNumber: string;
-  customerName?: string;
+  items: Array<{ title: string; priceCents: number; quantity: number }>;
 };
 
 function escapeHtml(value: string) {
@@ -63,13 +64,15 @@ export async function sendOrderConfirmationEmail({ email, firstName, orderNumber
   });
 }
 
-export async function sendNewOrderNotificationEmail({
-  orderNumber,
-  customerName,
-  customerEmail,
-  customerPhone,
-  totalCents,
-}: NewOrderNotification) {
+function orderDetailsHtml(details: OrderEmailDetails) {
+  const items = details.items.length === 0
+    ? "<li>Производите не се достапни</li>"
+    : details.items.map((item) => `<li>${escapeHtml(item.title)} · ${item.quantity} × ${item.priceCents} ден.</li>`).join("");
+
+  return `<p><strong>Купувач</strong></p><p>Име: ${escapeHtml(details.firstName)}<br />Презиме: ${escapeHtml(details.lastName)}<br />Email: ${escapeHtml(details.email)}<br />Телефон: ${escapeHtml(details.phone)}<br />Адреса: ${escapeHtml(details.addressLine)}<br />Град: ${escapeHtml(details.city)}<br />Поштенски број: ${escapeHtml(details.postalCode)}<br />Држава: ${escapeHtml(details.country)}</p><p><strong>Производи</strong></p><ul>${items}</ul><p><strong>Вкупно: ${details.totalCents} ден.</strong></p>`;
+}
+
+async function sendOwnerOrderEmail(details: OrderEmailDetails, subject: string, intro: string) {
   const from = getFromAddress();
   const recipient = process.env.ORDER_NOTIFICATION_EMAIL ?? process.env.ADMIN_EMAIL;
 
@@ -80,26 +83,15 @@ export async function sendNewOrderNotificationEmail({
   await getTransporter().sendMail({
     from,
     to: recipient,
-    subject: `Нова нарачка ${orderNumber}`,
-    html: `<p>Имате нова нарачка.</p><p><strong>${escapeHtml(orderNumber)}</strong></p><p>Купувач: ${escapeHtml(customerName)}<br />Email: ${escapeHtml(customerEmail)}<br />Телефон: ${escapeHtml(customerPhone)}</p><p>Вкупно: ${totalCents} ден.</p>`,
+    subject,
+    html: `<p>${intro}</p><p><strong>Нарачка: ${escapeHtml(details.orderNumber)}</strong></p>${orderDetailsHtml(details)}`,
   });
 }
 
-export async function sendOrderConfirmedNotificationEmail({
-  orderNumber,
-  customerName,
-}: ConfirmedOrderNotification) {
-  const from = getFromAddress();
-  const recipient = process.env.ORDER_NOTIFICATION_EMAIL ?? process.env.ADMIN_EMAIL;
+export async function sendNewOrderNotificationEmail(details: OrderEmailDetails) {
+  await sendOwnerOrderEmail(details, `Нова нарачка ${details.orderNumber}`, "Имате нова нарачка.");
+}
 
-  if (!from || !recipient) {
-    throw new Error("Missing ORDER_FROM_EMAIL, GMAIL_USER, or ORDER_NOTIFICATION_EMAIL");
-  }
-
-  await getTransporter().sendMail({
-    from,
-    to: recipient,
-    subject: `Нарачката ${orderNumber} е потврдена`,
-    html: `<p>Нарачката <strong>${escapeHtml(orderNumber)}</strong> е потврдена од купувачот.</p>${customerName ? `<p>Купувач: ${escapeHtml(customerName)}</p>` : ""}`,
-  });
+export async function sendOrderConfirmedNotificationEmail(details: OrderEmailDetails) {
+  await sendOwnerOrderEmail(details, `Нарачката ${details.orderNumber} е потврдена`, "Нарачката е потврдена од купувачот.");
 }
