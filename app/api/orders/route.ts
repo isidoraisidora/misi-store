@@ -1,9 +1,17 @@
+// app/api/orders/route.ts
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { sendNewOrderNotificationEmail, sendOrderConfirmationEmail } from "@/lib/order-email";
-import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
+
+// Server-only client using the service role key - bypasses RLS.
+// Never import this file or expose these env vars to client-side code.
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+);
 
 type OrderRequest = {
   customer?: {
@@ -23,12 +31,10 @@ function requiredText(value: unknown, field: string, maxLength = 200) {
   if (typeof value !== "string" || value.trim().length === 0) {
     throw new Error(`${field} is required`);
   }
-
   const text = value.trim();
   if (text.length > maxLength) {
     throw new Error(`${field} is too long`);
   }
-
   return text;
 }
 
@@ -60,18 +66,11 @@ export async function POST(request: Request) {
       if (!item || typeof item !== "object") {
         throw new Error("Each item must have a productId and quantity");
       }
-
-      const productId = requiredText(
-        (item as { productId?: unknown }).productId,
-        "productId",
-        100,
-      );
+      const productId = requiredText((item as { productId?: unknown }).productId, "productId", 100);
       const quantity = (item as { quantity?: unknown }).quantity;
-
       if (quantity !== 1) {
         throw new Error("Each second-hand item can only be ordered once");
       }
-
       return { productId, quantity };
     });
 
@@ -79,22 +78,27 @@ export async function POST(request: Request) {
     const lastName = requiredText(customer.lastName, "lastName");
     const email = requiredText(customer.email, "email", 320);
     if (!isEmail(email)) throw new Error("email is invalid");
+    const phone = requiredText(customer.phone, "phone", 40);
+
     const confirmationToken = randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(confirmationToken).digest("hex");
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     const appUrl = process.env.APP_URL;
     if (!appUrl) throw new Error("Missing APP_URL");
 
-    const { data, error } = await getSupabaseAdmin().rpc("create_order", {
+    const { data, error } = await supabaseAdmin.rpc("create_order", {
       order_customer: {
         firstName,
         lastName,
         email,
-        phone: requiredText(customer.phone, "phone", 40),
+        phone,
         addressLine: requiredText(customer.addressLine, "addressLine"),
         city: requiredText(customer.city, "city"),
         postalCode: requiredText(customer.postalCode, "postalCode", 20),
-        country: typeof customer.country === "string" && customer.country.trim() ? customer.country.trim() : "North Macedonia",
+        country:
+          typeof customer.country === "string" && customer.country.trim()
+            ? customer.country.trim()
+            : "North Macedonia",
       },
       requested_items: normalizedItems,
       token_hash: tokenHash,
@@ -110,14 +114,27 @@ export async function POST(request: Request) {
     }
 
     const order = Array.isArray(data) ? data[0] : data;
-    await sendOrderConfirmationEmail({ email, firstName, orderNumber: order.order_number, confirmationUrl: `${appUrl}/api/orders/confirm?token=${confirmationToken}` });
-    await sendNewOrderNotificationEmail({
-      orderNumber: order.order_number,
-      customerName: `${firstName} ${lastName}`,
-      customerEmail: email,
-      customerPhone: requiredText(customer.phone, "phone", 40),
-      totalCents: order.total_cents,
-    });
+
+    // Order is already created at this point - email failures should NOT
+    // fail the request or the customer might retry and duplicate the order.
+    try {
+      await sendOrderConfirmationEmail({
+        email,
+        firstName,
+        orderNumber: order.order_number,
+        confirmationUrl: `${appUrl}/order-confirm?token=${confirmationToken}`,
+      });
+      await sendNewOrderNotificationEmail({
+        orderNumber: order.order_number,
+        customerName: `${firstName} ${lastName}`,
+        customerEmail: email,
+        customerPhone: phone,
+        totalCents: order.total_cents,
+      });
+    } catch (emailError) {
+      console.error("Order created but email failed:", emailError);
+    }
+
     return NextResponse.json({ order: { orderNumber: order.order_number, status: "in_progress" } }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid order";

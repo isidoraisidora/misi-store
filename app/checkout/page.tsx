@@ -33,7 +33,7 @@ export default function CheckoutPage() {
     setItems([]);
   };
 
-  if (submitted) return <main className="checkout-page"><nav className="nav-shell"><Link className="wordmark" href="/">MISI STORE</Link></nav><section className="checkout-success"><p className="eyebrow">Almost there</p><h1>Провери го<br /><em>твојот email.</em></h1><p>Ти испративме линк за потврда за нарачката <strong>{submitted}</strong>. Нарачката ќе се обработи откако ќе ја потврдиш.</p><Link className="button button-dark" href="/catalogue">Назад кон каталогот <span>↗</span></Link></section></main>;
+  if (submitted) return <main className="checkout-page"><nav className="nav-shell"><Link className="wordmark" href="/">MISI STORE</Link></nav><section className="checkout-success"><p className="eyebrow">Almost there</p><h1>Провери го<br /><em>твојот email(провери и спам).</em></h1><p>Ти испративме линк за потврда за нарачката <strong>{submitted}</strong>. Нарачката ќе се обработи откако ќе ја потврдиш.</p><Link className="button button-dark" href="/catalogue">Назад кон каталогот <span>↗</span></Link></section></main>;
 
   if (items.length === 0) return <main className="checkout-page"><nav className="nav-shell"><Link className="wordmark" href="/">MISI STORE</Link></nav><section className="checkout-success"><p className="eyebrow">Your selection</p><h1>Кошничката е<br /><em>празна.</em></h1><p>Додајте барем едно парче пред да продолжите со нарачката.</p><Link className="button button-dark" href="/catalogue">Назад кон каталогот <span>↗</span></Link></section></main>;
 

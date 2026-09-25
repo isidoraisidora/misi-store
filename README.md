@@ -45,8 +45,9 @@ The complete list is available in `.env.example`.
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase service-role key. Keep it secret. |
 | `NEXT_PUBLIC_SUPABASE_URL` | Public Supabase project URL for client/deployment configuration. |
 | `APP_URL` | Public app URL used when building order confirmation links. |
-| `RESEND_API_KEY` | Resend API key used to send order emails. |
-| `ORDER_FROM_EMAIL` | Sender address for order confirmation emails. |
+| `GMAIL_USER` | Gmail account used by the server to send order emails. |
+| `GMAIL_APP_PASSWORD` | Gmail app password for `GMAIL_USER`. Do not use your normal Gmail password. |
+| `ORDER_FROM_EMAIL` | Sender address for order confirmation emails, normally the Gmail account. |
 | `ORDER_NOTIFICATION_EMAIL` | Recipient for new-order notifications. Falls back to `ADMIN_EMAIL` when omitted. |
 | `ADMIN_EMAIL` | Admin login email. |
 | `ADMIN_PASSWORD` | Admin login password. Use a strong password in production. |
