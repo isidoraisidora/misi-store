@@ -1,7 +1,7 @@
 // app/order-confirm/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 type LookupResult = {
@@ -11,6 +11,14 @@ type LookupResult = {
 };
 
 export default function OrderConfirmPage() {
+  return (
+    <Suspense fallback={<main style={{ padding: 32 }}>Се вчитува...</main>}>
+      <OrderConfirmContent />
+    </Suspense>
+  );
+}
+
+function OrderConfirmContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
@@ -22,10 +30,8 @@ export default function OrderConfirmPage() {
 
   useEffect(() => {
     if (!token) {
-      void Promise.resolve().then(() => {
-        setErrorMsg("Линкот е невалиден.");
-        setLoading(false);
-      });
+      setErrorMsg("Линкот е невалиден.");
+      setLoading(false);
       return;
     }
 
