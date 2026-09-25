@@ -5,6 +5,11 @@ MISI STORE is a second-hand shop for carefully selected clothing, accessories, a
 
 ## Features
 
+- Public catalogue with filtering, sorting, pagination, and cart support.
+- Email-confirmed orders sent through Gmail SMTP before and after confirmation.
+- Admin dashboard for managing products and viewing order analytics at `/admin/analytics`.
+- Confirmed revenue, pending order value, and order status reporting.
+
 ### GitHub Actions deployment
 
 The workflow in `.github/workflows/deploy.yml` runs on pushes to `main` and can also be started manually from the GitHub Actions tab. It installs dependencies, runs lint, and deploys the production project through Vercel.
@@ -18,6 +23,8 @@ Add these GitHub repository secrets before pushing to `main`:
 | `VERCEL_PROJECT_ID` | The Vercel project ID. |
 
 Set the application environment variables in Vercel under the project settings. They are not supplied by the GitHub workflow.
+
+For Gmail delivery, enable 2-Step Verification on the sending account and create a Gmail App Password. Use that App Password as `GMAIL_APP_PASSWORD`; never use the normal Gmail password.
 
 Fill in the values in `.env.local`. Never commit that file or expose the Supabase service-role key in browser code.
 
@@ -67,6 +74,8 @@ The schema in `supabase/schema.sql` creates and configures:
 - `create_order` and `confirm_order` functions for validated order creation and confirmation.
 - The public `misi-store-images` storage bucket for product images.
 
+When a customer submits an order, the order is stored as `in_progress` and both the customer confirmation email and the full owner notification are sent. After the customer confirms, the order becomes `confirmed`, products become unavailable, and the owner receives the full order details again.
+
 Products are marked unavailable after an order is confirmed. Prices are entered and displayed as whole denar amounts in the UI; the existing `price_cents` column stores that numeric value for compatibility.
 
 ## Useful commands
@@ -84,6 +93,7 @@ npm start         # Serve the production build
 ```text
 app/                    Next.js routes and pages
 app/api/                API and admin route handlers
+app/admin/analytics/    Protected order and revenue analytics page
 app/product/[id]/       Dynamic product detail page
 lib/                    Supabase, product, auth, email, and import helpers
 public/                 Static assets
@@ -103,24 +113,6 @@ npm run build
 
 Do not commit `.env.local`, service-role keys, API tokens, or production admin credentials.
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
@@ -130,8 +122,3 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
